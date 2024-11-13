@@ -19,7 +19,7 @@ sudo apt install apache2
 
 Verificar se o serviço está rodando:
 ```
-sudo /opt/lampp/lampp status
+systemctl status apache2
 ```
 
 # Instalação:
