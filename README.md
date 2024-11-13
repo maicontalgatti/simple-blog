@@ -14,17 +14,7 @@ Xampp:
 Fazer download:
 
 ```
-wget https://www.apachefriends.org/xampp-files/8.1.17/xampp-linux-x64-8.1.17-0-installer.run
-```
-
-Dar permissão de execução do arquivo:
-```
-chmod +x xampp-linux-x64-8.1.17-0-installer.run
-```
-
-Executar o instalador:
-```
-sudo ./xampp-linux-x64-8.1.17-0-installer.run
+sudo apt install apache2
 ```
 
 Verificar se o serviço está rodando:
