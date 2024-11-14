@@ -17,7 +17,7 @@ $user = "postgres";
 $password = "root";
 
 try {
-    $pdo = new PDO("pgsql:host=$host;dbname=$dbname", $user, $password);
+    $pdo = new PDO("pgsql:host=$host;dbname=$dbname", $user, $password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 } catch (PDOException $e) {
     die("Erro de conexão: " . $e->getMessage());
 }
@@ -28,6 +28,8 @@ if (isset($_POST['login'])) {
     $password = $_POST['password'];
     if ($username === 'admin' && $password === 'admin') {
         $_SESSION['logged_in'] = true;
+        header("Location: index.php");
+        exit();
     } else {
         $login_error = "Credenciais inválidas!";
     }
@@ -41,10 +43,10 @@ if (isset($_GET['logout'])) {
 }
 
 // Adiciona novo post
-if (isset($_POST['new_post']) && $_SESSION['logged_in']) {
+if (isset($_POST['new_post']) && isset($_SESSION['logged_in']) && $_SESSION['logged_in']) {
     $title = $_POST['title'];
     $content = $_POST['content'];
-    $stmt = $pdo->prepare("INSERT INTO posts (title, content) VALUES (:title, :content)");
+    $stmt = $pdo->prepare("INSERT INTO posts (title, content, created_at) VALUES (:title, :content, NOW())");
     $stmt->execute([':title' => $title, ':content' => $content]);
     header("Location: index.php");
     exit();
@@ -52,19 +54,18 @@ if (isset($_POST['new_post']) && $_SESSION['logged_in']) {
 
 // Lista todos os posts
 $posts = [];
-if ($_SESSION['logged_in']) {
+if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']) {
     $stmt = $pdo->query("SELECT * FROM posts ORDER BY created_at DESC");
     $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
-
 
 <div class="container mt-5">
     <?php if (!isset($_SESSION['logged_in'])): ?>
         <h2 class="mb-3">Login</h2>
         <form method="POST" action="">
             <?php if (isset($login_error)): ?>
-                <div class="alert alert-danger"><?= $login_error ?></div>
+                <div class="alert alert-danger"><?= htmlspecialchars($login_error) ?></div>
             <?php endif; ?>
             <div class="form-group">
                 <label for="username">Usuário</label>
@@ -100,7 +101,7 @@ if ($_SESSION['logged_in']) {
                 <li class="list-group-item">
                     <h5><?= htmlspecialchars($post['title']) ?></h5>
                     <p><?= nl2br(htmlspecialchars($post['content'])) ?></p>
-                    <small class="text-muted">Publicado em: <?= $post['created_at'] ?></small>
+                    <small class="text-muted">Publicado em: <?= htmlspecialchars($post['created_at']) ?></small>
                 </li>
             <?php endforeach; ?>
         </ul>
